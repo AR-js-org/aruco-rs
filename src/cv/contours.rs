@@ -7,7 +7,7 @@ use crate::{ImageBuffer, Point2i};
 /// # Arguments
 /// * `src` - The source `ImageBuffer`.
 /// * `dst` - The destination byte slice, which MUST be dynamically allocated to accommodate
-///           the `(width + 2) * (height + 2)` zero-padded array size.
+///   the `(width + 2) * (height + 2)` zero-padded array size.
 ///
 /// # Returns
 /// A reference to the modified destination slice.
@@ -180,7 +180,7 @@ pub fn border_following(
 /// # Arguments
 /// * `src_img` - The parsed `ImageBuffer` of the base threshold output.
 /// * `binary` - A large dynamically allocated scratchpad array of `i32`
-///              equal to size `(width + 2) * (height + 2)`.
+///   equal to size `(width + 2) * (height + 2)`.
 ///
 /// # Returns
 /// A comprehensive `Vec<Contour>` encapsulating all geometric boundary chains.
@@ -288,7 +288,7 @@ mod tests {
         assert_eq!(contours.len(), 2);
 
         // Check that holes are properly detected
-        assert_eq!(contours[0].hole, false); // Outer trace
-        assert_eq!(contours[1].hole, true); // Inner hole trace
+        assert!(!contours[0].hole); // Outer trace
+        assert!(contours[1].hole); // Inner hole trace
     }
 }

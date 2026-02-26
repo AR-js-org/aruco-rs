@@ -1,4 +1,5 @@
 // src/cv/scalar.rs
+#![allow(clippy::needless_range_loop)]
 
 use crate::cv::ComputerVision;
 use crate::ImageBuffer;

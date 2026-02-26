@@ -49,11 +49,12 @@ impl ComputerVision for WasmCV {
                 j += 1;
                 i += 4;
             }
-            return;
         }
 
-        // Fallback for non-wasm32 architecture
-        crate::cv::scalar::ScalarCV::grayscale(src, dst);
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            crate::cv::scalar::ScalarCV::grayscale(src, dst);
+        }
     }
 
     /// Applies a simple threshold to a grayscale image.
@@ -155,10 +156,13 @@ impl ComputerVision for WasmCV {
                 dst[i] = if val <= -(threshold as i32) { 255 } else { 0 };
                 i += 1;
             }
-            return;
+            }
         }
 
-        crate::cv::scalar::ScalarCV::adaptive_threshold(src, dst, kernel_size, threshold);
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            crate::cv::scalar::ScalarCV::adaptive_threshold(src, dst, kernel_size, threshold);
+        }
     }
 
     /// Extracts a patch using perspective transform and bilinear interpolation.
@@ -174,6 +178,7 @@ impl ComputerVision for WasmCV {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::needless_range_loop)]
     use super::*;
     use crate::ImageBuffer;
 

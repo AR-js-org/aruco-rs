@@ -1,4 +1,6 @@
 // src/core/detector.rs
+#![allow(clippy::needless_range_loop)]
+#![allow(clippy::collapsible_if)]
 
 use crate::core::dictionary::{Dictionary, DictionaryMatch};
 use crate::cv::contours::{find_contours, Contour};

@@ -50,11 +50,12 @@ impl ComputerVision for NativeCV {
                 j += 1;
                 i += 4;
             }
-            return;
         }
 
-        // Fallback for non-x86_64 architecture
-        crate::cv::scalar::ScalarCV::grayscale(src, dst);
+        #[cfg(not(target_arch = "x86_64"))]
+        {
+            crate::cv::scalar::ScalarCV::grayscale(src, dst);
+        }
     }
 
     /// Applies a simple threshold to a grayscale image.
@@ -163,15 +164,26 @@ impl ComputerVision for NativeCV {
                 dst[i] = if val <= -(threshold as i32) { 255 } else { 0 };
                 i += 1;
             }
-            return;
         }
 
-        crate::cv::scalar::ScalarCV::adaptive_threshold(src, dst, kernel_size, threshold);
+        #[cfg(not(target_arch = "x86_64"))]
+        {
+            crate::cv::scalar::ScalarCV::adaptive_threshold(src, dst, kernel_size, threshold);
+        }
+    }
+
+    fn warp(src: &ImageBuffer, dst: &mut [u8], contour: &[crate::Point2f; 4], warp_size: usize) {
+        crate::cv::scalar::ScalarCV::warp(src, dst, contour, warp_size)
+    }
+
+    fn count_non_zero(src: &ImageBuffer, square: &crate::cv::Square) -> usize {
+        crate::cv::scalar::ScalarCV::count_non_zero(src, square)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::needless_range_loop)]
     use super::*;
     use crate::ImageBuffer;
 

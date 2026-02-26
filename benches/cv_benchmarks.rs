@@ -1,4 +1,5 @@
 // benches/cv_benchmarks.rs
+#![allow(clippy::needless_range_loop)]
 use aruco_rs::cv::scalar::ScalarCV;
 use aruco_rs::cv::ComputerVision;
 use aruco_rs::{ImageBuffer, Point2f};
@@ -271,14 +272,14 @@ fn bench_count_non_zero(c: &mut Criterion) {
 fn bench_detector_fake(c: &mut Criterion) {
     use aruco_rs::core::detector::Detector;
     use aruco_rs::core::dictionary::{Dictionary, DICTIONARY_ARUCO};
-    
+
     let mut group = c.benchmark_group("Detector_Detect");
     let dict = Dictionary::new(&DICTIONARY_ARUCO);
 
     for &(width, height) in SIZES.iter() {
         let num_pixels = width * height;
         let mut data = vec![255u8; num_pixels * 4];
-        
+
         // Draw a simulated black marker 50x50 in the middle
         let start_x = width / 2 - 25;
         let start_y = height / 2 - 25;
@@ -288,9 +289,9 @@ fn bench_detector_fake(c: &mut Criterion) {
         for y in start_y..end_y {
             for x in start_x..end_x {
                 let idx = (y * width + x) * 4;
-                data[idx] = 0;       // R
-                data[idx + 1] = 0;   // G
-                data[idx + 2] = 0;   // B
+                data[idx] = 0; // R
+                data[idx + 1] = 0; // G
+                data[idx + 2] = 0; // B
                 data[idx + 3] = 255; // A
             }
         }
@@ -311,9 +312,11 @@ fn bench_detector_fake(c: &mut Criterion) {
         #[cfg(all(target_arch = "x86_64", feature = "simd"))]
         {
             let detector_simd = Detector::new(&dict, NativeCV);
-            group.bench_with_input(BenchmarkId::new("simd_native", &size_str), &size_str, |b, _| {
-                b.iter(|| detector_simd.detect(black_box(&buffer)))
-            });
+            group.bench_with_input(
+                BenchmarkId::new("simd_native", &size_str),
+                &size_str,
+                |b, _| b.iter(|| detector_simd.detect(black_box(&buffer))),
+            );
         }
     }
     group.finish();
@@ -323,12 +326,12 @@ fn bench_detector_real(c: &mut Criterion) {
     use aruco_rs::core::detector::Detector;
     use aruco_rs::core::dictionary::{Dictionary, DICTIONARY_ARUCO};
     use std::path::Path;
-    
+
     let mut group = c.benchmark_group("Detector_RealImage");
     let dict = Dictionary::new(&DICTIONARY_ARUCO);
 
     let image_path = Path::new("tests/data/real_marker.png");
-    
+
     // Fallback if the user hasn't provided the image yet
     if !image_path.exists() {
         println!("⚠️ Skipping bench_detector_real: tests/data/real_marker.png not found.");
@@ -353,14 +356,18 @@ fn bench_detector_real(c: &mut Criterion) {
         let size_str = format!("Native ({}x{})", width, height);
 
         let detector_scalar = Detector::new(&dict, ScalarCV);
-        group.bench_with_input(BenchmarkId::new("scalar_real", &size_str), &size_str, |b, _| {
-            b.iter(|| detector_scalar.detect(black_box(&buffer)))
-        });
+        group.bench_with_input(
+            BenchmarkId::new("scalar_real", &size_str),
+            &size_str,
+            |b, _| b.iter(|| detector_scalar.detect(black_box(&buffer))),
+        );
     }
 
     // 2. Benchmark Downscaled AR Webcam Resolution (640x480)
     {
-        let img_640 = img.resize_exact(640, 480, image::imageops::FilterType::Nearest).to_rgba8();
+        let img_640 = img
+            .resize_exact(640, 480, image::imageops::FilterType::Nearest)
+            .to_rgba8();
         let width = img_640.width();
         let height = img_640.height();
         let data = img_640.into_raw();
@@ -374,9 +381,11 @@ fn bench_detector_real(c: &mut Criterion) {
         let size_str = format!("Webcam ({}x{})", width, height);
 
         let detector_scalar = Detector::new(&dict, ScalarCV);
-        group.bench_with_input(BenchmarkId::new("scalar_real", &size_str), &size_str, |b, _| {
-            b.iter(|| detector_scalar.detect(black_box(&buffer)))
-        });
+        group.bench_with_input(
+            BenchmarkId::new("scalar_real", &size_str),
+            &size_str,
+            |b, _| b.iter(|| detector_scalar.detect(black_box(&buffer))),
+        );
     }
 
     group.finish();

@@ -408,6 +408,7 @@ pub struct Dictionary {
     pub tau: usize,
     pub mark_size: usize,
     code_list: &'static [u64],
+    #[allow(dead_code)]
     codes: HashMap<u64, usize>,
 }
 
