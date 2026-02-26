@@ -4,7 +4,7 @@
 use crate::core::detector::Detector;
 use crate::cv::scalar::ScalarCV;
 use crate::{ImageBuffer, Marker};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 #[derive(Serialize)]
@@ -37,7 +37,7 @@ impl From<&Marker> for WasmMarker {
 /// JS-facing Detector
 #[wasm_bindgen]
 pub struct ARucoDetector {
-    detector: Detector<ScalarCV>,
+    detector: Detector<'static, ScalarCV>,
 }
 
 #[wasm_bindgen]
@@ -47,19 +47,10 @@ impl ARucoDetector {
         dict_name: &str,
         max_hamming_distance: Option<i32>,
     ) -> Result<ARucoDetector, JsValue> {
-        let mut opts = crate::core::detector::DetectorOptions::default();
-        if let Some(dist) = max_hamming_distance {
-            opts.max_hamming_distance = dist;
-        }
-
-        let dict = if dict_name == "ARUCO_MIP_36h12" {
-            crate::core::dictionary::Dictionary::from_predefined(
-                crate::core::dictionary::PredefinedDictionary::ArucoMip36h12,
-            )
+        let mut dict = if dict_name == "ARUCO_MIP_36h12" {
+            crate::core::dictionary::Dictionary::new(&crate::core::dictionary::DICTIONARY_ARUCO_MIP_36H12)
         } else if dict_name == "ARUCO" {
-            crate::core::dictionary::Dictionary::from_predefined(
-                crate::core::dictionary::PredefinedDictionary::Aruco,
-            )
+            crate::core::dictionary::Dictionary::new(&crate::core::dictionary::DICTIONARY_ARUCO)
         } else {
             return Err(JsValue::from_str(&format!(
                 "Dictionary {} is not compiled-in.",
@@ -67,8 +58,13 @@ impl ARucoDetector {
             )));
         };
 
+        if let Some(dist) = max_hamming_distance {
+            dict.tau = dist as usize;
+        }
+
+        let dict_ref: &'static crate::core::dictionary::Dictionary = Box::leak(Box::new(dict));
         let cv = ScalarCV;
-        let detector = Detector::new(dict, cv, opts);
+        let detector = Detector::new(dict_ref, cv);
 
         Ok(ARucoDetector { detector })
     }
@@ -87,12 +83,9 @@ impl ARucoDetector {
             height,
         };
 
-        match self.detector.detect(&buffer) {
-            Ok(markers) => {
-                let js_markers: Vec<WasmMarker> = markers.iter().map(|m| m.into()).collect();
-                Ok(serde_wasm_bindgen::to_value(&js_markers).unwrap())
-            }
-            Err(_) => Err(JsValue::from_str("Detection failed or invalid buffer")),
-        }
+        let markers = self.detector.detect(&buffer);
+        let js_markers: Vec<WasmMarker> = markers.iter().map(WasmMarker::from).collect();
+        
+        Ok(serde_wasm_bindgen::to_value(&js_markers).unwrap())
     }
 }

@@ -1,0 +1,17 @@
+{
+    "name": "aruco-wasm-example",
+    "version": "1.0.0",
+    "description": "Simple example testing the aruco-rs webassembly bundle",
+    "scripts": {
+        "start": "vite"
+    },
+    "dependencies": {
+        "@ar-js-org/aruco-rs": "file:../../pkg",
+        "canvas": "^3.2.1"
+    },
+    "devDependencies": {
+        "vite": "^5.0.0",
+        "vite-plugin-top-level-await": "^1.4.0",
+        "vite-plugin-wasm": "^3.3.0"
+    }
+}

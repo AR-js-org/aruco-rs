@@ -3,8 +3,8 @@
     "version": "0.1.0",
     "description": "Developer tooling for building the aruco-rs WASM bundle",
     "scripts": {
-        "build:wasm": "wasm-pack build --target bundler --out-dir pkg",
-        "build:web": "wasm-pack build --target web --out-dir pkg"
+        "build:wasm": "wasm-pack build --target bundler --out-dir pkg --scope ar-js-org --features wasm",
+        "build:web": "wasm-pack build --target web --out-dir pkg --scope ar-js-org --features wasm"
     },
     "devDependencies": {
         "wasm-pack": "^0.14.0"

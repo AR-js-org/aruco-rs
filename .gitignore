@@ -34,3 +34,8 @@ tests/data/real_marker.png
 
 # Do not track reference ARuco-ts repository
 reference/
+
+# WASM Generated Package Directory
+/pkg/
+node_modules/
+/**/**/node_modules/
