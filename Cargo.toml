@@ -1,0 +1,63 @@
+[package]
+name = "aruco-rs"
+version = "0.1.0"
+authors = ["kalwalt <https://github.com/kalwalt>"]
+edition = "2021"
+description = "A high-performance, SIMD-accelerated ArUco marker detector for Native and WASM."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/AR-js-org/aruco-rs"
+
+[lib]
+# "cdylib" is required for WASM, "rlib" for standard Rust linking
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Core linear algebra library, used for Pose Estimation and Geometry
+# The "simd" feature enables nalgebra's internal SIMD optimizations
+nalgebra = { version = "0.33" }
+
+# Required for WebAssembly interop
+wasm-bindgen = { version = "0.2", optional = true }
+
+# Console error panic hook makes debugging WASM much easier
+console_error_panic_hook = { version = "0.1.7", optional = true }
+
+# Logging for both native and web
+log = "0.4"
+safe_arch = "1.0.0"
+
+[dev-dependencies]
+# Benchmarking tool to compare Scalar vs SIMD performance
+criterion = { version = "0.5", features = ["html_reports"] }
+# For testing image loading in native environments
+image = { version = "0.25", default-features = false, features = [
+    "png",
+    "jpeg",
+] }
+
+[features]
+default = ["native"]
+
+# Feature to enable when building for the browser
+wasm = ["dep:wasm-bindgen", "dep:console_error_panic_hook", "nalgebra/macros"]
+
+# Feature for native desktop/mobile builds
+native = []
+
+# SIMD feature flag (used in code via #[cfg(feature = "simd")])
+simd = []
+
+[profile.release]
+# Optimize for speed, but keep some debug symbols for profiling
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[package.metadata.wasm-pack.profile.release]
+# Ensure wasm-opt is used to shrink the binary size
+wasm-opt = ["-O4", "--enable-simd"]
+
+[[bench]]
+name = "cv_benchmarks"
+harness = false
