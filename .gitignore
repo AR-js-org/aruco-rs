@@ -31,5 +31,6 @@ Thumbs.db
 # Heavy test images
 tests/data/real_marker.png
 
-# Agent metadata
-.agent/
+
+# Do not track reference ARuco-ts repository
+reference/
