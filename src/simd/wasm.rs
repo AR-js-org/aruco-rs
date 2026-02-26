@@ -156,7 +156,6 @@ impl ComputerVision for WasmCV {
                 dst[i] = if val <= -(threshold as i32) { 255 } else { 0 };
                 i += 1;
             }
-            }
         }
 
         #[cfg(not(target_arch = "wasm32"))]
