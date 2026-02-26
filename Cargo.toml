@@ -14,10 +14,12 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 # Core linear algebra library, used for Pose Estimation and Geometry
 # The "simd" feature enables nalgebra's internal SIMD optimizations
-nalgebra = { version = "0.33" }
+nalgebra = { version = "0.33", default-features = false, features = ["std"] }
 
-# Required for WebAssembly interop
+# Required for WebAssembly interop and object serialization
 wasm-bindgen = { version = "0.2", optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde-wasm-bindgen = { version = "0.6", optional = true }
 
 # Console error panic hook makes debugging WASM much easier
 console_error_panic_hook = { version = "0.1.7", optional = true }
@@ -39,7 +41,13 @@ image = { version = "0.25", default-features = false, features = [
 default = ["native"]
 
 # Feature to enable when building for the browser
-wasm = ["dep:wasm-bindgen", "dep:console_error_panic_hook", "nalgebra/macros"]
+wasm = [
+    "dep:wasm-bindgen",
+    "dep:console_error_panic_hook",
+    "dep:serde",
+    "dep:serde-wasm-bindgen",
+    "nalgebra/macros",
+]
 
 # Feature for native desktop/mobile builds
 native = []

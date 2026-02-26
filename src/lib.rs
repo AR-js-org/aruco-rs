@@ -50,3 +50,6 @@ pub mod core;
 pub mod cv;
 pub mod pose;
 pub mod simd;
+
+#[cfg(feature = "wasm")]
+pub mod wasm_bridge;

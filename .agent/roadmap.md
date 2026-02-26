@@ -27,9 +27,10 @@
 - [x] Port standard ArUco Dictionaries to `src/core/dictionary.rs`.
 - [x] Implement Hamming distance error correction.
 
-## Phase 4: Pose & Integration
-- [ ] Implement Pose Estimation using `nalgebra` in `src/pose/`.
-- [ ] Create `wasm-bindgen` wrapper for high-performance WebAR usage.
+## 4. Phase 4: Pose Estimation & WebGL Integration (Completed)
+- Port POSIT (`src/core/posit.rs`)
+- Port SVD math (`src/core/svd.rs`)
+- Implement `wasm-bindgen` API wrappers for high-performance WebAR usage.
 
 ## CI/CD Infrastructure
 - [ ] Create `.github/workflows/rust.yml` to trigger tests & formatting checks on push.
