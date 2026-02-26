@@ -48,7 +48,9 @@ impl ARucoDetector {
         max_hamming_distance: Option<i32>,
     ) -> Result<ARucoDetector, JsValue> {
         let mut dict = if dict_name == "ARUCO_MIP_36h12" {
-            crate::core::dictionary::Dictionary::new(&crate::core::dictionary::DICTIONARY_ARUCO_MIP_36H12)
+            crate::core::dictionary::Dictionary::new(
+                &crate::core::dictionary::DICTIONARY_ARUCO_MIP_36H12,
+            )
         } else if dict_name == "ARUCO" {
             crate::core::dictionary::Dictionary::new(&crate::core::dictionary::DICTIONARY_ARUCO)
         } else {
@@ -85,7 +87,7 @@ impl ARucoDetector {
 
         let markers = self.detector.detect(&buffer);
         let js_markers: Vec<WasmMarker> = markers.iter().map(WasmMarker::from).collect();
-        
+
         Ok(serde_wasm_bindgen::to_value(&js_markers).unwrap())
     }
 }
