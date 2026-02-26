@@ -391,12 +391,81 @@ fn bench_detector_real(c: &mut Criterion) {
     group.finish();
 }
 
+fn bench_gaussian_blur(c: &mut Criterion) {
+    let mut group = c.benchmark_group("GaussianBlur");
+    for &(width, height) in SIZES.iter() {
+        let num_pixels = width * height;
+        let mut data = vec![0u8; num_pixels];
+        for (i, val) in data.iter_mut().enumerate().take(num_pixels) {
+            *val = (i % 256) as u8;
+        }
+
+        let buffer = ImageBuffer {
+            data: &data,
+            width: width as u32,
+            height: height as u32,
+        };
+
+        // Output buffer
+        let mut out = vec![0u8; num_pixels];
+        let size_str = format!("{}x{}", width, height);
+
+        let kernel_size = 5;
+
+        group.bench_with_input(BenchmarkId::new("scalar", &size_str), &size_str, |b, _| {
+            b.iter(|| {
+                ScalarCV::gaussian_blur(
+                    black_box(&buffer),
+                    black_box(&mut out),
+                    black_box(kernel_size),
+                )
+            })
+        });
+
+        #[cfg(all(target_arch = "wasm32", feature = "simd"))]
+        {
+            group.bench_with_input(
+                BenchmarkId::new("simd_wasm", &size_str),
+                &size_str,
+                |b, _| {
+                    b.iter(|| {
+                        aruco_rs::simd::wasm::WasmCV::gaussian_blur(
+                            black_box(&buffer),
+                            black_box(&mut out),
+                            black_box(kernel_size),
+                        )
+                    })
+                },
+            );
+        }
+
+        #[cfg(all(target_arch = "x86_64", feature = "simd"))]
+        {
+            group.bench_with_input(
+                BenchmarkId::new("simd_native", &size_str),
+                &size_str,
+                |b, _| {
+                    b.iter(|| {
+                        aruco_rs::simd::native::NativeCV::gaussian_blur(
+                            black_box(&buffer),
+                            black_box(&mut out),
+                            black_box(kernel_size),
+                        )
+                    })
+                },
+            );
+        }
+    }
+    group.finish();
+}
+
 criterion_group!(
     benches,
     bench_grayscale,
     bench_threshold,
     bench_otsu,
     bench_stack_box_blur,
+    bench_gaussian_blur,
     bench_adaptive_threshold,
     bench_find_contours,
     bench_warp,

@@ -169,9 +169,12 @@ impl ComputerVision for WasmCV {
         crate::cv::scalar::ScalarCV::warp(src, dst, contour, warp_size)
     }
 
-    /// Counts non-zero pixels within a specified square area safely.
     fn count_non_zero(src: &ImageBuffer, square: &crate::cv::Square) -> usize {
         crate::cv::scalar::ScalarCV::count_non_zero(src, square)
+    }
+
+    fn gaussian_blur(src: &ImageBuffer, dst: &mut [u8], kernel_size: usize) {
+        crate::cv::scalar::ScalarCV::gaussian_blur(src, dst, kernel_size)
     }
 }
 

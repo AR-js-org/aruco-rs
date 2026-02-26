@@ -345,6 +345,7 @@ mod tests {
             }
             count
         }
+        fn gaussian_blur(_src: &ImageBuffer, _dst: &mut [u8], _kernel_size: usize) {}
     }
 
     #[test]

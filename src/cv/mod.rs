@@ -69,6 +69,15 @@ pub trait ComputerVision {
     /// * `src` - The source `ImageBuffer`.
     /// * `square` - The rectangular region to check.
     fn count_non_zero(src: &ImageBuffer, square: &Square) -> usize;
+
+    /// Applies a Gaussian blur to the image.
+    /// Mirror of `CV.gaussianBlur` in ARuco-ts.
+    ///
+    /// # Arguments
+    /// * `src` - The source `ImageBuffer`.
+    /// * `dst` - The destination buffer array.
+    /// * `kernel_size` - Size of the Gaussian kernel.
+    fn gaussian_blur(src: &ImageBuffer, dst: &mut [u8], kernel_size: usize);
 }
 
 /// Defines a rectangular region of interest

@@ -295,6 +295,108 @@ impl ComputerVision for ScalarCV {
 
         nz
     }
+
+    /// Applies a Gaussian blur to the image.
+    /// Mirror of `CV.gaussianBlur` in ARuco-ts.
+    fn gaussian_blur(src: &ImageBuffer, dst: &mut [u8], kernel_size: usize) {
+        let kernel = Self::gaussian_kernel(kernel_size);
+        let mut temp = vec![0u8; dst.len()];
+        let width = src.width as usize;
+        let height = src.height as usize;
+
+        // In JS: CV.gaussianBlurFilter(imageSrc, imageMean, kernel, true);
+        Self::gaussian_blur_filter(src.data, &mut temp, width, height, &kernel, true);
+        // In JS: CV.gaussianBlurFilter(imageMean, imageDst, kernel, false);
+        Self::gaussian_blur_filter(&temp, dst, width, height, &kernel, false);
+    }
+}
+
+// Private helper methods for Gaussian Blur (mirroring static CV methods)
+impl ScalarCV {
+    /// Generates a 1D Gaussian kernel array.
+    /// Mirror of `CV.gaussianKernel` in ARuco-ts.
+    fn gaussian_kernel(kernel_size: usize) -> Vec<f64> {
+        let tab = [
+            vec![1.0],
+            vec![0.25, 0.5, 0.25],
+            vec![0.0625, 0.25, 0.375, 0.25, 0.0625],
+            vec![
+                0.03125, 0.109375, 0.21875, 0.28125, 0.21875, 0.109375, 0.03125,
+            ],
+        ];
+
+        if kernel_size <= 7 && kernel_size % 2 == 1 {
+            return tab[kernel_size >> 1].clone();
+        }
+
+        let mut kernel = vec![0.0; kernel_size];
+        let center = (kernel_size as f64 - 1.0) * 0.5;
+        let sigma = 0.8 + 0.3 * (center - 1.0);
+        let scale2x = -0.5 / (sigma * sigma);
+        let mut sum = 0.0;
+
+        for (i, val) in kernel.iter_mut().enumerate() {
+            let x = i as f64 - center;
+            let v = (scale2x * x * x).exp();
+            *val = v;
+            sum += v;
+        }
+
+        let inv_sum = 1.0 / sum;
+        for val in kernel.iter_mut() {
+            *val *= inv_sum;
+        }
+
+        kernel
+    }
+
+    /// Applies a 1D Gaussian kernel over the horizontal or vertical axis.
+    /// Mirror of `CV.gaussianBlurFilter` in ARuco-ts.
+    fn gaussian_blur_filter(
+        src: &[u8],
+        dst: &mut [u8],
+        width: usize,
+        height: usize,
+        kernel: &[f64],
+        horizontal: bool,
+    ) {
+        let mut pos = 0;
+        let limit = (kernel.len() >> 1) as i32;
+        let w = width as i32;
+        let h = height as i32;
+
+        for i in 0..h {
+            for j in 0..w {
+                let mut value = 0.0;
+
+                for k in -limit..=limit {
+                    let mut cur;
+                    if horizontal {
+                        cur = pos as i32 + k;
+                        if j + k < 0 || j + k >= w {
+                            cur = pos as i32;
+                        }
+                    } else {
+                        cur = pos as i32 + k * w;
+                        if i + k < 0 || i + k >= h {
+                            cur = pos as i32;
+                        }
+                    }
+
+                    value += kernel[(limit + k) as usize] * (src[cur as usize] as f64);
+                }
+
+                if horizontal {
+                    // TS: writes to Uint8ClampedArray directly (rounds to even integer)
+                    dst[pos] = value.round_ties_even().clamp(0.0, 255.0) as u8;
+                } else {
+                    // TS: `(value + 0.5) | 0` directly on primitive Number
+                    dst[pos] = (value + 0.5).floor().clamp(0.0, 255.0) as u8;
+                }
+                pos += 1;
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -412,8 +514,39 @@ mod tests {
         ScalarCV::adaptive_threshold(&src, &mut dst, 2, 10);
 
         // Ensure the output is strictly binary (0 or 255)
-        for i in 0..64 {
-            assert!(dst[i] == 0 || dst[i] == 255);
+        for item in &dst {
+            assert!(*item == 0 || *item == 255);
         }
+    }
+
+    #[test]
+    fn test_gaussian_kernel() {
+        let kernel = ScalarCV::gaussian_kernel(3);
+        assert_eq!(kernel.len(), 3);
+        assert!((kernel[0] - 0.25).abs() < 1e-6);
+        assert!((kernel[1] - 0.50).abs() < 1e-6);
+        assert!((kernel[2] - 0.25).abs() < 1e-6);
+
+        let sum: f64 = kernel.iter().sum();
+        assert!((sum - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_gaussian_blur() {
+        let mut gray = [0u8; 64];
+        for (i, val) in gray.iter_mut().enumerate() {
+            *val = if i % 4 == 0 { 200 } else { 50 };
+        }
+        let src = ImageBuffer {
+            data: &gray,
+            width: 8,
+            height: 8,
+        };
+        let mut dst = [0u8; 64];
+
+        ScalarCV::gaussian_blur(&src, &mut dst, 3);
+
+        let sum: u32 = dst.iter().map(|&x| x as u32).sum();
+        assert!(sum > 0 && sum != (gray.iter().map(|&x| x as u32).sum()));
     }
 }

@@ -179,6 +179,10 @@ impl ComputerVision for NativeCV {
     fn count_non_zero(src: &ImageBuffer, square: &crate::cv::Square) -> usize {
         crate::cv::scalar::ScalarCV::count_non_zero(src, square)
     }
+
+    fn gaussian_blur(src: &ImageBuffer, dst: &mut [u8], kernel_size: usize) {
+        crate::cv::scalar::ScalarCV::gaussian_blur(src, dst, kernel_size)
+    }
 }
 
 #[cfg(test)]
