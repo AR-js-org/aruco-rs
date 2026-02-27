@@ -78,5 +78,15 @@ for marker in markers {
 }
 ```
 
+## Contributing
+When creating new source files (`.rs`, `.ts`, `.js`), please ensure they include the standard MIT license header at the very top:
+```rust
+// Copyright (c) 2026 kalwalt and AR.js-org contributors
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+```
+You can use the provided `add_license.ps1` script to automatically apply this header to missing files.
+
 ## License
 MIT
