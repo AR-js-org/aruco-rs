@@ -6,6 +6,9 @@ edition = "2021"
 description = "A high-performance, SIMD-accelerated ArUco marker detector for Native and WASM."
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/AR-js-org/aruco-rs"
+readme = "README.md"
+keywords = ["cv", "computervision", "aruco", "simd", "wasm"]
+categories = ["computer-vision", "wasm", "science"]
 
 [lib]
 # "cdylib" is required for WASM, "rlib" for standard Rust linking
