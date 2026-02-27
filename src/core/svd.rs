@@ -1,3 +1,8 @@
+// Copyright (c) 2026 kalwalt and AR.js-org contributors
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+// See https://github.com/AR-js-org/aruco-rs/blob/main/LICENSE
 /// Ported exactly from `svd.ts` to ensure 1:1 bit parity in pose estimation logic.
 /// Singular Value Decomposition computed via Householder reduction to bidiagonal form
 /// and QR transformations.

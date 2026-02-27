@@ -1,3 +1,8 @@
+// Copyright (c) 2026 kalwalt and AR.js-org contributors
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+// See https://github.com/AR-js-org/aruco-rs/blob/main/LICENSE
 // tests/data/sample_8x8.rs
 
 /// An 8x8 RGBA image patch for unit testing.

@@ -1,3 +1,8 @@
+// Copyright (c) 2026 kalwalt and AR.js-org contributors
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+// See https://github.com/AR-js-org/aruco-rs/blob/main/LICENSE
 use crate::{ImageBuffer, Point2i};
 
 /// Fills the destination array with a 1-pixel padded zero-border around the source image,
